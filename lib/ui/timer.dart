@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:timer/background_service.dart';
 import 'package:timer/ui/actions.dart';
 import 'package:timer/ui/background.dart';
 
@@ -13,7 +17,10 @@ class TimerView extends StatelessWidget {
         children: [
           Background(),
           StreamBuilder<Map<String, dynamic>?>(
-            stream: FlutterBackgroundService().onDataReceived,
+            /// Use the STREAM based on the Platform to recieve the data
+            stream: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                ? FlutterBackgroundService().onDataReceived
+                : businessLogicToUI.stream,
             builder: (context, snapshot) {
               final int seconds = (snapshot.data?["seconds"] ?? 0) as int;
               return Column(

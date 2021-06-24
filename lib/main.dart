@@ -1,11 +1,18 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:timer/background_service.dart';
 import 'package:timer/ui/timer.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  FlutterBackgroundService.initialize(onStart);
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    WidgetsFlutterBinding.ensureInitialized();
+    FlutterBackgroundService.initialize(onStart);
+  } else {
+    onStart();
+  }
 
   runApp(MyApp());
 }

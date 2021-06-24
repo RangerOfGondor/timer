@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:timer/background_service.dart';
 import 'package:timer/constants.dart';
 
 class ActionWidgets extends StatelessWidget {
@@ -9,6 +13,19 @@ class ActionWidgets extends StatelessWidget {
   final bool hasStarted;
   final bool isPaused;
 
+  /// This is the common method that sends the actions to the respective streams
+  void sendAction(actions action) {
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      FlutterBackgroundService().sendData(
+        {"action": actionToString[action]},
+      );
+    } else {
+      uiToBusinessLogic.add(
+        {"action": actionToString[action]},
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -17,35 +34,23 @@ class ActionWidgets extends StatelessWidget {
         if (hasStarted) ...[
           FloatingActionButton(
               child: Icon(Icons.stop),
-              onPressed: () {
-                FlutterBackgroundService().sendData(
-                  {"action": actionToString[actions.stop]},
-                );
-              }),
+              onPressed: () => sendAction(actions.stop)),
         ],
         FloatingActionButton(
             child: (!isPaused) ? Icon(Icons.pause) : Icon(Icons.play_arrow),
-            onPressed: () async {
+            onPressed: () {
               if (!isPaused) {
-                FlutterBackgroundService().sendData({
-                  "action": actionToString[actions.pause],
-                });
+                sendAction(actions.pause);
               } else if (hasStarted) {
-                FlutterBackgroundService().sendData({
-                  "action": actionToString[actions.play],
-                });
+                sendAction(actions.play);
               } else {
-                FlutterBackgroundService().sendData(
-                  {"action": actionToString[actions.start]},
-                );
+                sendAction(actions.start);
               }
             }),
         if (hasStarted) ...[
           FloatingActionButton(
             child: Icon(Icons.replay),
-            onPressed: () => FlutterBackgroundService().sendData({
-              "action": actionToString[actions.reset],
-            }),
+            onPressed: () => sendAction(actions.reset),
           ),
         ],
       ],
